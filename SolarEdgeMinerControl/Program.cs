@@ -39,7 +39,14 @@ namespace SolarEdgeMinerControl
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("[ERROR] " + ex.Message);
+                    Console.WriteLine("");
+                    Console.WriteLine("//////////////////////////////////////////////////////////////");
+                    Console.WriteLine("");
+                    Console.WriteLine("[ERROR] Failed to get solar power data: " + ex.Message);
+                    Console.WriteLine("");
+                    Console.WriteLine("//////////////////////////////////////////////////////////////");
+                    Console.WriteLine("");
+                    Console.WriteLine("");
                 }
 
                 Thread.Sleep(checkIntervalSeconds * 1000);
@@ -50,10 +57,12 @@ namespace SolarEdgeMinerControl
         {
             using HttpClient client = new HttpClient();
             string url = $"https://monitoringapi.solaredge.com/site/{siteId}/overview.json?api_key={apiKey}";
+
             HttpResponseMessage response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync();
             using JsonDocument doc = JsonDocument.Parse(json);
+
             return doc.RootElement.GetProperty("overview").GetProperty("currentPower").GetProperty("power").GetDouble();
         }
 
