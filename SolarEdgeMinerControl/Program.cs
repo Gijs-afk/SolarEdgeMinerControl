@@ -8,14 +8,16 @@ using System.Threading;
 
 namespace SolarEdgeMinerControl
 {
+
     class Program
     {
         // === CONFIGURE THESE ===
         static string apiKey = "YOUR_API_KEY_HERE";             // Your SolarEdge API key
         static string siteId = "YOUR_SITE_ID_HERE";             // Your SolarEdge site ID
         static int thresholdWatts = 300;                        // Minimum solar output to start mining
-        static string minerProcessName = "nhqm";                // QuickMiner process name (usually 'nhqm')
-        static string minerPath = @"C:\\Program Files\\NiceHash QuickMiner\\nhqm.exe"; // Path to QuickMiner EXE
+        static int checkIntervalSeconds = 300;                  // Check every 5 minutes
+
+        static bool isMining = false;
 
 
         static async Task Main(string[] args)
@@ -30,11 +32,27 @@ namespace SolarEdgeMinerControl
 
                     if (power >= thresholdWatts)
                     {
-                        await StartMiner();
+                        if (!isMining)
+                        {
+                            await StartMiner();
+                            isMining = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[DATETIME]{DateTime.Now}             [INFO] Miner is already running. No action taken");
+                        }
                     }
                     else
                     {
-                        await StopMiner();
+                        if (isMining)
+                        {
+                            await StopMiner();
+                            isMining = false;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[DATETIME]{DateTime.Now}             [INFO] Solar output is below threshold. No action taken");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -84,24 +102,16 @@ namespace SolarEdgeMinerControl
             }
         }
 
-
-
         static async Task StartMiner()
         {
-            if (!Process.GetProcessesByName(minerProcessName).Any())
-            {
-                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Starting miner...");
-                await SendMinerCommand("start_mining");
-            }
+            Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Starting miner...");
+            await SendMinerCommand("start_mining");
         }
 
         static async Task StopMiner()
         {
-            foreach (var proc in Process.GetProcessesByName(minerProcessName))
-            {
-                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Stopping miner...");
-                await SendMinerCommand("stop_mining");
-            }
+            Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Stopping miner...");
+            await SendMinerCommand("stop_mining");
         }
     }
 }
