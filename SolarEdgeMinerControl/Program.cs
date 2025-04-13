@@ -12,12 +12,14 @@ namespace SolarEdgeMinerControl
     class Program
     {
         // === CONFIGURE THESE ===
-        static string apiKey = "YOUR_API_KEY_HERE";             // Your SolarEdge API key
-        static string siteId = "YOUR_SITE_ID_HERE";             // Your SolarEdge site ID
-        static int thresholdWatts = 300;                        // Minimum solar output to start mining
-        static int checkIntervalSeconds = 300;                  // Check every 5 minutes
+        static string solarEdgeApiKey = "YOUR_API_KEY_HERE";                            // Your SolarEdge API key
+        static string solarEdgeSiteId = "YOUR_SITE_ID_HERE";                            // Your SolarEdge site ID
+        static string watchDogAPIAuth = "YOUR_WATCHDOG_AUTHENTICATION_HERE";            // Your WatchDog API authentication token
+        static int watchDogPort = 18000;                                                // Standard WatchDog port is 18000 change if different
+        static int thresholdWatts = 600;                                                // Threshold in watts to start/stop the miner
+        static int checkIntervalSeconds = 300;                                          // Check every 5 minutes
 
-        static bool isMining = false;
+        static bool isMining = true;
 
 
         static async Task Main(string[] args)
@@ -74,7 +76,7 @@ namespace SolarEdgeMinerControl
         static async Task<double> GetCurrentSolarPower()
         {
             using HttpClient client = new HttpClient();
-            string url = $"https://monitoringapi.solaredge.com/site/{siteId}/overview.json?api_key={apiKey}";
+            string url = $"https://monitoringapi.solaredge.com/site/{solarEdgeSiteId}/overview.json?api_key={solarEdgeApiKey}";
 
             HttpResponseMessage response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
@@ -87,14 +89,25 @@ namespace SolarEdgeMinerControl
         static async Task SendMinerCommand(string command)
         {
             using HttpClient client = new HttpClient();
-            string url = $"http://localhost:18000/command";
-            var content = new StringContent($"{{\"method\":\"{command}\"}}", System.Text.Encoding.UTF8, "application/json");
+            var commandJson = new
+            {
+                id = 1,
+                method = command,
+                @params = Array.Empty<object>()
+            };
+
+            string commandJsonString = JsonSerializer.Serialize(commandJson);
+            string encodedCommand = Uri.EscapeDataString(commandJsonString);
+
+
+            string url = $"http://localhost:{watchDogPort}/api?command={encodedCommand}";
+            client.DefaultRequestHeaders.Add("Authorization", watchDogAPIAuth);
 
             try
             {
-                var response = await client.PostAsync(url, content);
-                response.EnsureSuccessStatusCode();
-                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Send command: {command}");
+                var response = await client.GetAsync(url);
+                var body = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Send command: {command} : {response.StatusCode} - {body}");
             }
             catch (HttpRequestException ex)
             {
@@ -105,13 +118,13 @@ namespace SolarEdgeMinerControl
         static async Task StartMiner()
         {
             Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Starting miner...");
-            await SendMinerCommand("start_mining");
+            await SendMinerCommand("quit");
         }
 
         static async Task StopMiner()
         {
             Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Stopping miner...");
-            await SendMinerCommand("stop_mining");
+            await SendMinerCommand("miner.stop");
         }
     }
 }
