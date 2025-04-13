@@ -14,7 +14,7 @@ namespace SolarEdgeMinerControl
         // === CONFIGURE THESE ===
         static string solarEdgeApiKey = "YOUR_API_KEY_HERE";                            // Your SolarEdge API key
         static string solarEdgeSiteId = "YOUR_SITE_ID_HERE";                            // Your SolarEdge site ID
-        static string watchDogAPIAuth = "YOUR_WATCHDOG_AUTHENTICATION_HERE";            // Your WatchDog API authentication token
+        static string watchDogAPIAuth = "YOUR_WATCHDOG_AUTHENTICATION_HERE";            // Your WatchDog API authentication token (found in the config file)
         static int watchDogPort = 18000;                                                // Standard WatchDog port is 18000 change if different
         static int thresholdWatts = 600;                                                // Threshold in watts to start/stop the miner
         static int checkIntervalSeconds = 300;                                          // Check every 5 minutes
