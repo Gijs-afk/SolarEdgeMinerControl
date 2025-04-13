@@ -1,20 +1,32 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarEdgeMinerControl", "SolarEdgeMinerControl\SolarEdgeMinerControl.csproj", "{6B96688B-D47A-47A2-99AC-2F69AA62678D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		V1|Any CPU = V1|Any CPU
+		V1|x64 = V1|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Debug|x64.ActiveCfg = Debug|x64
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Debug|x64.Build.0 = Debug|x64
 		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Release|x64.ActiveCfg = Release|x64
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.Release|x64.Build.0 = Release|x64
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.V1|Any CPU.ActiveCfg = V1|Any CPU
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.V1|Any CPU.Build.0 = V1|Any CPU
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.V1|x64.ActiveCfg = V1|x64
+		{6B96688B-D47A-47A2-99AC-2F69AA62678D}.V1|x64.Build.0 = V1|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,12 +11,12 @@ namespace SolarEdgeMinerControl
     class Program
     {
         // === CONFIGURE THESE ===
-        static string apiKey = "YOUR_API_KEY_HERE";
-        static string siteId = "YOUR_SITE_ID_HERE";
-        static int thresholdWatts = 300; // Start mining if solar production > 300W
-        static int checkIntervalSeconds = 300; // Check every 5 minutes
-        static string minerProcessName = "nhqm"; // NiceHash QuickMiner process name
-        static string minerPath = @"C:\\Program Files\\NiceHash QuickMiner\\nhqm.exe"; // Adjust if different
+        static string apiKey = "YOUR_API_KEY_HERE";             // Your SolarEdge API key
+        static string siteId = "YOUR_SITE_ID_HERE";             // Your SolarEdge site ID
+        static int thresholdWatts = 300;                        // Minimum solar output to start mining
+        static string minerProcessName = "nhqm";                // QuickMiner process name (usually 'nhqm')
+        static string minerPath = @"C:\\Program Files\\NiceHash QuickMiner\\nhqm.exe"; // Path to QuickMiner EXE
+
 
         static async Task Main(string[] args)
         {
@@ -26,15 +26,15 @@ namespace SolarEdgeMinerControl
                 try
                 {
                     double power = await GetCurrentSolarPower();
-                    Console.WriteLine($"[INFO] Current solar output: {power}W");
+                    Console.WriteLine($"[DATETIME]{DateTime.Now}             [INFO] Current solar output: {power}W");
 
                     if (power >= thresholdWatts)
                     {
-                        StartMiner();
+                        await StartMiner();
                     }
                     else
                     {
-                        StopMiner();
+                        await StopMiner();
                     }
                 }
                 catch (Exception ex)
@@ -42,7 +42,7 @@ namespace SolarEdgeMinerControl
                     Console.WriteLine("");
                     Console.WriteLine("//////////////////////////////////////////////////////////////");
                     Console.WriteLine("");
-                    Console.WriteLine("[ERROR] Failed to get solar power data: " + ex.Message);
+                    Console.WriteLine($"[DATETIME]{DateTime.Now}             [ERROR] Failed to get solar power data: {ex.Message} ");
                     Console.WriteLine("");
                     Console.WriteLine("//////////////////////////////////////////////////////////////");
                     Console.WriteLine("");
@@ -66,21 +66,41 @@ namespace SolarEdgeMinerControl
             return doc.RootElement.GetProperty("overview").GetProperty("currentPower").GetProperty("power").GetDouble();
         }
 
-        static void StartMiner()
+        static async Task SendMinerCommand(string command)
         {
-            if (!Process.GetProcessesByName(minerProcessName).Any())
+            using HttpClient client = new HttpClient();
+            string url = $"http://localhost:18000/command";
+            var content = new StringContent($"{{\"method\":\"{command}\"}}", System.Text.Encoding.UTF8, "application/json");
+
+            try
             {
-                Console.WriteLine("[ACTION] Starting miner...");
-                Process.Start(minerPath);
+                var response = await client.PostAsync(url, content);
+                response.EnsureSuccessStatusCode();
+                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Send command: {command}");
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ERROR] Failed to send command: {command} : {ex.Message}");
             }
         }
 
-        static void StopMiner()
+
+
+        static async Task StartMiner()
+        {
+            if (!Process.GetProcessesByName(minerProcessName).Any())
+            {
+                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Starting miner...");
+                await SendMinerCommand("start_mining");
+            }
+        }
+
+        static async Task StopMiner()
         {
             foreach (var proc in Process.GetProcessesByName(minerProcessName))
             {
-                Console.WriteLine("[ACTION] Stopping miner...");
-                proc.Kill();
+                Console.WriteLine($"[DATETIME]{DateTime.Now}             [ACTION] Stopping miner...");
+                await SendMinerCommand("stop_mining");
             }
         }
     }
